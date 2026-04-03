@@ -1,0 +1,143 @@
+// --- 1. VARIABLES (Couleurs & Thème) ---
+$bg-dark: #1a1a2e;
+$panel-dark: #16213e;
+$accent: #48abe0;
+$success: #27ae60;
+$danger: #e74c3c;
+$text-light: #e9ecef;
+$input-bg: #0f3460;
+
+// --- 2. MIXINS (Styles réutilisables) ---
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+}
+
+// --- 3. STYLES GÉNÉRAUX ---
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', sans-serif;
+  display: flex;
+  height: 100vh;
+  background: $bg-dark;
+  color: $text-light;
+}
+
+#map {
+  flex-grow: 1;
+  height: 100%;
+}
+
+// --- 4. BARRE LATÉRALE ---
+#sidebar {
+  width: 340px;
+  background: $panel-dark;
+  padding: 20px;
+  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.5);
+  z-index: 10;
+  overflow-y: auto;
+
+  .header {
+    text-align: center;
+    border-bottom: 1px solid lighten($panel-dark, 10%);
+    margin-bottom: 20px;
+
+    h1 {
+      margin: 0;
+      color: $accent;
+      font-size: 1.6rem;
+    }
+    p {
+      font-size: 0.8rem;
+      opacity: 0.7;
+    }
+  }
+
+  .section {
+    margin-bottom: 20px;
+  }
+
+  // Grille pour les dimensions (Hauteur, Largeur, Poids)
+  .specs-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    background: rgba(white, 0.03);
+    padding: 15px;
+    border-radius: 8px;
+
+    label {
+      color: $accent;
+      font-weight: bold;
+      font-size: 0.8rem;
+    }
+  }
+}
+
+// --- 5. COMPOSANTS (Inputs & Boutons) ---
+input, select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid lighten($panel-dark, 15%);
+  background: $input-bg;
+  color: white;
+  margin-top: 5px;
+  box-sizing: border-box;
+
+  &:focus {
+    outline: none;
+    border-color: $accent;
+  }
+}
+
+button {
+  width: 100%;
+  background: $success;
+  color: white;
+  padding: 15px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 20px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: lighten($success, 5%);
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+#info-box {
+  margin-top: 25px;
+  padding: 15px;
+  background: rgba(black, 0.2);
+  border-left: 4px solid $accent;
+  border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+  body {
+    flex-direction: column; // La barre passe au-dessus ou en-dessous de la carte
+  }
+
+  #sidebar {
+    width: 100%; // Prend toute la largeur
+    height: auto;
+    max-height: 40vh; // Ne couvre pas plus de 40% de l'écran
+    order: 2; // Place la barre en bas
+    border-radius: 20px 20px 0 0; // Look "tiroir" moderne
+  }
+
+  #map {
+    height: 60vh;
+    order: 1;
+  }
+}

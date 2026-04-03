@@ -1,0 +1,114 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", sans-serif;
+  display: flex;
+  height: 100vh;
+  background: #1a1a2e;
+  color: #e9ecef;
+}
+
+#map {
+  flex-grow: 1;
+  height: 100%;
+}
+
+#sidebar {
+  width: 340px;
+  background: #16213e;
+  padding: 20px;
+  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.5);
+  z-index: 10;
+  overflow-y: auto;
+}
+#sidebar .header {
+  text-align: center;
+  border-bottom: 1px solid rgb(35.3571428571, 53.0357142857, 99.6428571429);
+  margin-bottom: 20px;
+}
+#sidebar .header h1 {
+  margin: 0;
+  color: #48abe0;
+  font-size: 1.6rem;
+}
+#sidebar .header p {
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+#sidebar .section {
+  margin-bottom: 20px;
+}
+#sidebar .specs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 15px;
+  border-radius: 8px;
+}
+#sidebar .specs-grid label {
+  color: #48abe0;
+  font-weight: bold;
+  font-size: 0.8rem;
+}
+
+input, select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid rgb(42.0357142857, 63.0535714286, 118.4642857143);
+  background: #0f3460;
+  color: white;
+  margin-top: 5px;
+  box-sizing: border-box;
+}
+input:focus, select:focus {
+  outline: none;
+  border-color: #48abe0;
+}
+
+button {
+  width: 100%;
+  background: #27ae60;
+  color: white;
+  padding: 15px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 20px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+button:hover {
+  background: rgb(43.6690140845, 194.8309859155, 107.4929577465);
+  transform: translateY(-2px);
+}
+button:active {
+  transform: translateY(0);
+}
+
+#info-box {
+  margin-top: 25px;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.2);
+  border-left: 4px solid #48abe0;
+  border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+  body {
+    flex-direction: column;
+  }
+  #sidebar {
+    width: 100%;
+    height: auto;
+    max-height: 40vh;
+    order: 2;
+    border-radius: 20px 20px 0 0;
+  }
+  #map {
+    height: 60vh;
+    order: 1;
+  }
+}/*# sourceMappingURL=style.css.map */
