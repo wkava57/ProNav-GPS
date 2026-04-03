@@ -10,6 +10,31 @@ const map = new mapboxgl.Map({
     zoom: 6
 });
 
+// 1. On crée l'objet de recherche (Geocoder)
+const geocoder = new MapboxGeocoder({
+    accessToken: mapboxgl.accessToken, // Ton token
+    mapboxgl: mapboxgl,
+    placeholder: 'Rechercher une ville ou adresse', // Le texte d'aide
+    //countries: 'fr', // Pour rester en France
+    marker: false // On ne veut pas le marqueur par défaut de Mapbox
+});
+
+// 2. ON L'AJOUTE RÉELLEMENT À LA CARTE (C'est cette ligne qui fait apparaître la loupe)
+map.addControl(geocoder, 'top-left'); 
+
+// 3. Que se passe-t-il quand on choisit une adresse ?
+geocoder.on('result', (e) => {
+    const coords = e.result.geometry.coordinates;
+    
+    // On simule un clic pour placer nos propres marqueurs (vert/rouge)
+    map.fire('click', {
+        lngLat: { lng: coords[0], lat: coords[1] },
+        point: map.project([coords[0], coords[1]])
+    });
+    
+    console.log("Lieu trouvé : ", e.result.place_name);
+});
+
 // 2bis. Bouton de Géolocalisation (Point Bleu)
 const geolocate = new mapboxgl.GeolocateControl({
     positionOptions: {
@@ -90,6 +115,17 @@ async function calculateRoute() {
     const start = markers[0].getLngLat();
     const end = markers[1].getLngLat();
     const vehicleHeight = parseFloat(document.getElementById('height').value);
+    
+    // Vérification des options ADR
+    const isExplosive = document.getElementById('adr-explosive').checked;
+    const isGas = document.getElementById('adr-gas').checked;
+
+if (isExplosive || isGas) {
+    console.log("Attention : Transport ADR détecté.");
+    // Ici on pourra plus tard ajouter des paramètres de filtrage Mapbox
+    // Pour l'instant, on prévient l'utilisateur
+    document.getElementById('status-text').innerHTML = "⚠️ <span style='color:#f1c40f'>Itinéraire ADR : Évitez les tunnels catégorie E.</span>";
+}
 
     // Construction de l'URL pour l'API Directions
     const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${start.lng},${start.lat};${end.lng},${end.lat}?geometries=geojson&access_token=${ACCESS_TOKEN}`;

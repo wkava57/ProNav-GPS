@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Truck & Bus Pro Navigator</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
-    <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.css" rel="stylesheet">
+
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js"></script>
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css" type="text/css">
 </head>
 <body>
 
@@ -64,6 +67,18 @@
         <option value="e">Catégorie E (Toutes marchandises dangereuses - Très restrictif)</option>
     </select>
     <small style="font-size: 0.7rem; color: #95a5a6;">Vérifiez le code tunnel sur votre document de transport.</small>
+    <div class="adr-section">
+    <h3>Matières Dangereuses (ADR)</h3>
+    <label class="checkbox-container">
+        <input type="checkbox" id="adr-explosive"> Explosifs (Classe 1)
+    </label>
+    <label class="checkbox-container">
+        <input type="checkbox" id="adr-gas"> Gaz Inflammables (Classe 2)
+    </label>
+    <label class="checkbox-container">
+        <input type="checkbox" id="adr-liquid"> Liquides Inflammables (Classe 3)
+    </label>
+</div>
 </div>
 
 <div class="section">

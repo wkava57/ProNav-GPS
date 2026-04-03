@@ -123,6 +123,33 @@ button {
   border-radius: 4px;
 }
 
+.adr-section {
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+
+    h3 {
+        font-size: 1rem;
+        color: #48abe0;
+        margin-bottom: 10px;
+    }
+
+    .checkbox-container {
+        display: block;
+        margin-bottom: 12px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        
+        input {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+    }
+}
+
 @media (max-width: 768px) {
   body {
     flex-direction: column; // La barre passe au-dessus ou en-dessous de la carte
