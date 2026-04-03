@@ -23,16 +23,13 @@ const geocoder = new MapboxGeocoder({
 map.addControl(geocoder, 'top-left'); 
 
 // 3. Que se passe-t-il quand on choisit une adresse ?
+// Écouter quand l'utilisateur choisit une adresse
 geocoder.on('result', (e) => {
-    const coords = e.result.geometry.coordinates;
+    const coordsDestination = e.result.geometry.coordinates; // [Longitude, Latitude]
+    console.log("Destination reçue :", coordsDestination);
     
-    // On simule un clic pour placer nos propres marqueurs (vert/rouge)
-    map.fire('click', {
-        lngLat: { lng: coords[0], lat: coords[1] },
-        point: map.project([coords[0], coords[1]])
-    });
-    
-    console.log("Lieu trouvé : ", e.result.place_name);
+    // APPEL DE LA FONCTION DE TRACÉ
+    calculateRoute(coordsDestination);
 });
 
 // 2bis. Bouton de Géolocalisation (Point Bleu)
@@ -46,6 +43,14 @@ const geolocate = new mapboxgl.GeolocateControl({
 
 // Ajoute le bouton en haut à droite (ou en bas pour le mobile si tu préfères)
 map.addControl(geolocate, 'top-right');
+
+map.on('load', () => {
+    // On attend un court instant pour que la carte soit stable
+    setTimeout(() => {
+        console.log("Tentative de localisation automatique...");
+        geolocate.trigger(); 
+    }, 1500);
+});
 
 // Optionnel : Quand on clique sur le bouton, on définit le départ à ma position
 geolocate.on('geolocate', (e) => {
@@ -109,73 +114,86 @@ map.on('click', (e) => {
 });
 
 // 5. Fonction de calcul d'itinéraire RÉEL (API Mapbox)
-async function calculateRoute() {
-    if (markers.length < 2) return;
+async function calculateRoute(endCoords) {
+    // 1. VERIFICATION GPS
+    if (!geolocate._lastKnownPosition) {
+        alert("Position GPS introuvable. Activez la localisation.");
+        return;
+    }
 
-    const start = markers[0].getLngLat();
-    const end = markers[1].getLngLat();
-    const vehicleHeight = parseFloat(document.getElementById('height').value);
-    
-    // Vérification des options ADR
-    const isExplosive = document.getElementById('adr-explosive').checked;
-    const isGas = document.getElementById('adr-gas').checked;
+    const start = [
+        geolocate._lastKnownPosition.coords.longitude,
+        geolocate._lastKnownPosition.coords.latitude
+    ];
 
-if (isExplosive || isGas) {
-    console.log("Attention : Transport ADR détecté.");
-    // Ici on pourra plus tard ajouter des paramètres de filtrage Mapbox
-    // Pour l'instant, on prévient l'utilisateur
-    document.getElementById('status-text').innerHTML = "⚠️ <span style='color:#f1c40f'>Itinéraire ADR : Évitez les tunnels catégorie E.</span>";
-}
-
-    // Construction de l'URL pour l'API Directions
-    const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${start.lng},${start.lat};${end.lng},${end.lat}?geometries=geojson&access_token=${ACCESS_TOKEN}`;
+    // 2. CONSTRUCTION DE L'URL (L'arme anti-avion)
+    // driving : force le passage sur route
+    // geometries=geojson : pour une ligne fluide
+    // overview=full : demande TOUS les points de la route au serveur
+    const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${start[0]},${start[1]};${endCoords[0]},${endCoords[1]}?geometries=geojson&overview=full&steps=true&access_token=${mapboxgl.accessToken}`;
 
     try {
         const response = await fetch(url);
         const data = await response.json();
 
         if (!data.routes || data.routes.length === 0) {
-            throw new Error("Aucun itinéraire trouvé");
+            console.error("Aucun itinéraire trouvé sur route.");
+            return;
         }
 
-        const routeData = data.routes[0];
-        const routeGeojson = routeData.geometry;
+        const routeGeometry = data.routes[0].geometry;
 
-        // Mise à jour de l'interface (Distance & Temps)
-        document.getElementById('dist').innerText = (routeData.distance / 1000).toFixed(1);
-        document.getElementById('time').innerText = Math.floor(routeData.duration / 60);
-        document.getElementById('route-details').style.display = 'block';
-
-        // Affichage du tracé sur la carte
+        // 3. AFFICHAGE SUR LA CARTE
+        // Si la source existe déjà, on met juste à jour les données
         if (map.getSource('route')) {
-            map.getSource('route').setData(routeGeojson);
-        } else {
-            map.addSource('route', { 
-                'type': 'geojson', 
-                'data': routeGeojson 
+            map.getSource('route').setData({
+                type: 'Feature',
+                properties: {},
+                geometry: routeGeometry
             });
+        } 
+        // Sinon, on crée la source et la couche (Layer)
+        else {
+            map.addSource('route', {
+                type: 'geojson',
+                data: {
+                    type: 'Feature',
+                    properties: {},
+                    geometry: routeGeometry
+                }
+            });
+
             map.addLayer({
-                'id': 'route',
-                'type': 'line',
-                'source': 'route',
-                'layout': { 'line-join': 'round', 'line-cap': 'round' },
-                'paint': { 
-                    'line-color': '#48abe0', 
-                    'line-width': 6, 
-                    'line-opacity': 0.8 
+                id: 'route',
+                type: 'line',
+                source: 'route',
+                layout: {
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                },
+                paint: {
+                    'line-color': '#00b4d8', // Bleu azur
+                    'line-width': 6,          // Épaisseur visible
+                    'line-opacity': 0.8
                 }
             });
         }
 
-        // Message d'alerte selon le gabarit
-        if (vehicleHeight > 3.8) {
-            document.getElementById('status-text').innerHTML = "⚠️ <span style='color:#e67e22'>Gabarit haut détecté. Vérifiez manuellement les ponts.</span>";
-        } else {
-            document.getElementById('status-text').innerText = "✅ Itinéraire routier chargé.";
-        }
+        // 4. MISE À JOUR DES INFOS DANS LE HTML
+        const distance = (data.routes[0].distance / 1000).toFixed(1); // KM
+        const duration = Math.floor(data.routes[0].duration / 60);    // MIN
+        
+        document.getElementById('trip-distance').innerText = `${distance} km`;
+        document.getElementById('trip-duration').innerText = `${duration} min`;
+        document.getElementById('mission-data').style.display = 'block';
+
+        // 5. AJUSTEMENT DE LA VUE
+        // La carte s'adapte pour montrer tout l'itinéraire
+        const bounds = new mapboxgl.LngLatBounds();
+        routeGeometry.coordinates.forEach(coord => bounds.extend(coord));
+        map.fitBounds(bounds, { padding: 50 });
 
     } catch (error) {
-        console.error("Erreur lors du calcul :", error);
-        document.getElementById('status-text').innerText = "❌ Erreur de connexion au service de routage.";
+        console.error("Erreur lors du calcul de l'itinéraire :", error);
     }
 }
